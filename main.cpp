@@ -3,10 +3,10 @@
 #include <ctime>
 
 class Branch {
-    Branch *bigBranch;
     std::string name;
+    Branch *bigBranch = nullptr;
 public:
-    Branch(std::string inName, Branch *inBigBranch = nullptr) : name(inName), bigBranch(inBigBranch) {
+    Branch(std::string inName, Branch *inBigBranch) : name(inName), bigBranch(inBigBranch) {
         if (inBigBranch == nullptr) {
             bigBranch = this;
         }
@@ -53,8 +53,8 @@ public:
             Branch *elf = branches[i]->findElf(name);
             if (elf != nullptr) {
                 std::cout << "The elf " << name << " has " << countNeighboursOnBigBranch(elf) << std::endl;
-            }else{
-                std::cout << "The elf not found"<< std::endl;
+            } else {
+                std::cout << "The elf not found" << std::endl;
             }
         }
     }
