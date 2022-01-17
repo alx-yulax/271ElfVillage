@@ -3,10 +3,12 @@
 #include <ctime>
 
 class Branch {
+    int id;
     std::string name;
     Branch *bigBranch = nullptr;
 public:
-    Branch(std::string inName, Branch *inBigBranch) : name(inName), bigBranch(inBigBranch) {
+
+    Branch(std::string inName, Branch *inBigBranch, int inId) : name(inName), bigBranch(inBigBranch), id(inId) {
         if (inBigBranch == nullptr) {
             bigBranch = this;
         }
@@ -35,26 +37,35 @@ public:
         return bigBranch;
     }
 
+    int getId() {
+        return id;
+    }
+
 };
 
 class Tree {
     std::vector<Branch *> branches;
 public:
-    Tree() {}
+    ~Tree() {
+        for (int i = 0; i < branches.size(); ++i) {
+            delete branches[i];
+        }
+    }
 
-    Branch *addBranch(std::string name, Branch *parent = nullptr) {
-        Branch *branch = new Branch(name, parent);
+    Branch *addBranch(std::string name, Branch *parent, int inId) {
+        Branch *branch = new Branch(name, parent, inId);
         branches.push_back(branch);
         return branch;
     }
 
-    int findElf(std::string name) {
+    void findElf(std::string name, int idTree) {
+
         for (int i = 0; i < branches.size(); ++i) {
             Branch *elf = branches[i]->findElf(name);
             if (elf != nullptr) {
-                std::cout << "The elf " << name << " has " << countNeighboursOnBigBranch(elf) << std::endl;
-            } else {
-                std::cout << "The elf not found" << std::endl;
+
+                std::cout << "The elf " << name << " found on the tree #" << idTree << " branch #" << elf->getId()
+                          << ". Hi has " << countNeighboursOnBigBranch(elf) << std::endl;
             }
         }
     }
@@ -74,40 +85,43 @@ public:
 int main() {
 
     std::string elfName;
-    std::vector<Tree *> trees;
+    Tree *trees[5] = {nullptr};
     std::srand(time(nullptr));
 
     for (int i = 0; i < 5; ++i) {
-        int BranchGigCount = 0;
+        int BranchBigCount = 0;
         int BranchMiddleCount = 0;
 
-        Tree *tree = new Tree();
-        trees.push_back(tree);
-        BranchGigCount = (std::rand() % 3) + 3;
-        for (int j = 0; j < BranchGigCount; ++j) {
-            std::cout << "Tree #" << i << " big #" << j << " middle #0" << std::endl;
-            std::cout << "Input name of the elf: ";
+        int idBranch = 0;
+        trees[i] = new Tree();
+        BranchBigCount = (std::rand() % 3) + 3;
+        for (int j = 0; j < BranchBigCount; ++j) {
+            std::cout << "Tree #" << i << " branch #" << idBranch << " (big). Input name of the elf: ";
             std::cin >> elfName;
-            Branch *branchBig = tree->addBranch(elfName);
-
+            Branch *branchBig = trees[i]->addBranch(elfName, nullptr, idBranch);
+            idBranch++;
             BranchMiddleCount = (std::rand() % 2) + 2;
             for (int k = 0; k < BranchMiddleCount; ++k) {
-                std::cout << "Tree #" << i << " big #" << j << " middle #" << k << std::endl;
-                std::cout << "Input name of the elf: ";
+                std::cout << "Tree #" << i << " branch #" << idBranch << " (middle). Input name of the elf: ";
                 std::cin >> elfName;
-                tree->addBranch(elfName, branchBig);
+                trees[i]->addBranch(elfName, branchBig, idBranch);
+                idBranch++;
             }
         }
-
+        std::cout << std::endl << "=================== Tree #" << i << " is full ====================" << std::endl;
     }
     std::cout << std::endl << "=======================================";
     std::cout << std::endl << "Counting elf's neighbors.";
     std::cout << "Input name of the elf: ";
     std::cin >> elfName;
 
-    for (int i = 0; i < trees.size(); ++i) {
-        trees[i]->findElf(elfName);
+    for (int i = 0; i < 5; ++i) {
+        trees[i]->findElf(elfName, i);
+
+        delete trees[i];
+        trees[i] = nullptr;
     }
+
 
     return 0;
 }
